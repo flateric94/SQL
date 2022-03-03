@@ -1,0 +1,117 @@
+\! echo --- Echauffement sur la base Rugby du TP2 ---
+
+\! echo Question 1.1
+\! echo le champ mid est de type "serial primary key", serial : entier a incrementation automatique
+
+\! echo Debut transaction
+BEGIN;
+\! echo Question 1.2, 1.3, 1.4
+INSERT INTO tournois VALUES (9,2,8,'champions league');
+SELECT * FROM tournois;
+INSERT INTO tournois VALUES (10, 'Championnat de France', 2021, 'France');
+SELECT * FROM tournois;
+ROLLBACK;
+
+SELECT * FROM tournois;
+SELECT * FROM matchs;
+SELECT * FROM matchs;
+
+\! echo CREATION DE LA TABLE JOUEUR (Question 1.5)
+DROP TABLE IF EXISTS joueurs CASCADE;
+CREATE TABLE joueurs (
+	jid serial PRIMARY KEY,
+	nom text NOT NULL,
+	prenom text NOT NULL,
+	dateDeNaissance date NOT NULL,
+	nationalite text NOT NULL);
+\d+ joueurs;
+
+\! echo REMPLISSEMENT DE LA TABLE JOUEUR (Question 1.6)
+\i tp3-joueur1.sql
+SELECT * FROM joueurs;
+
+\! echo CREATION DE LA TABLE JOUEUR+EQUIPES Question 1.7
+DROP TABLE IF EXISTS joueurEquipes;
+CREATE TABLE joueurEquipes (
+	jid integer,
+	eid integer,
+	PRIMARY KEY (jid, eid),
+	FOREIGN KEY (jid) REFERENCES joueurs(jid),
+	FOREIGN KEY (eid) REFERENCES equipes(eid));
+\d+ joueurEquipes;
+
+\! echo Question 1.8
+\i tp3-joueur2.sql
+SELECT * FROM joueurEquipes;
+
+\! echo Question 1.9
+INSERT INTO joueurEquipes (jid, eid) VALUES (1,30);
+
+\! echo Question 1.10
+\! echo Debut transaction
+BEGIN;
+SELECT * FROM equipes;
+DELETE FROM equipes WHERE nom='All Blacks';
+ROLLBACK;
+\! echo Soucis car violation de la contrainte de la cle etrangere "match_gagnant_fkey"
+
+
+\! echo L'option ON DELETE CASCADE permet de specifier si vous souhaitez supprimer des lignes dans une table enfant lorsque les lignes correspondantes sont supprimees dans la table parent. Si vous ne specifiez pas de suppressions en cascade, le comportement par defaut du serveur de base de donnees vous empeche de supprimer des donnees dans une table si d'autres tables y font reference.
+
+\! echo MODIFICATION DES CONTRAINTES DE LA TABLE MATCHS (Question 1.11)
+\d+ matchs;
+BEGIN;
+ALTER TABLE matchs DROP CONSTRAINT "matchs_gagnant_fkey";
+ALTER TABLE matchs DROP CONSTRAINT "matchs_perdant_fkey";
+ALTER TABLE matchs ADD CONSTRAINT matchs_gagnant_fkey FOREIGN KEY (gagnant) REFERENCES equipes(eid) ON DELETE CASCADE;
+ALTER TABLE matchs ADD CONSTRAINT matchs_perdant_fkey FOREIGN KEY (perdant) REFERENCES equipes(eid) ON DELETE CASCADE;
+\d+ matchs;
+ALTER TABLE matchs DROP CONSTRAINT "matchs_gagnant_fkey";
+ALTER TABLE matchs DROP CONSTRAINT "matchs_perdant_fkey";
+ALTER TABLE matchs ADD CONSTRAINT matchs_gagnant_fkey FOREIGN KEY (gagnant) REFERENCES equipes(eid);
+ALTER TABLE matchs ADD CONSTRAINT matchs_perdant_fkey FOREIGN KEY (perdant) REFERENCES equipes(eid);
+\d+ matchs;
+ROLLBACK;
+ALTER TABLE matchs DROP CONSTRAINT "matchs_gagnant_fkey";
+ALTER TABLE matchs DROP CONSTRAINT "matchs_perdant_fkey";
+ALTER TABLE matchs ADD CONSTRAINT matchs_gagnant_fkey FOREIGN KEY (gagnant) REFERENCES equipes(eid) ON DELETE CASCADE;
+ALTER TABLE matchs ADD CONSTRAINT matchs_perdant_fkey FOREIGN KEY (perdant) REFERENCES equipes(eid) ON DELETE CASCADE;
+\d+ matchs;
+
+
+\! echo MODIFICATION DES CONTRAINTES DE LA TABLE PARTICIPATION (Question 1.12)
+\d+ participation;
+BEGIN;
+ALTER TABLE participation DROP CONSTRAINT "participation_eid_fkey";
+ALTER TABLE participation ADD CONSTRAINT participation_eid_fkey FOREIGN KEY (eid) REFERENCES equipes(eid) ON DELETE CASCADE;
+\d+ participation;
+ALTER TABLE participation DROP CONSTRAINT "participation_eid_fkey";
+ALTER TABLE participation ADD CONSTRAINT participation_eid_fkey FOREIGN KEY (eid) REFERENCES equipes(eid);
+\d+ participation;
+ROLLBACK;
+ALTER TABLE participation DROP CONSTRAINT "participation_eid_fkey";
+ALTER TABLE participation ADD CONSTRAINT participation_eid_fkey FOREIGN KEY (eid) REFERENCES equipes(eid) ON DELETE CASCADE;
+\d+ participation;
+
+
+\! echo MODIFICATION DES CONTRAINTES DE LA TABLE JOUEUR+EQUIPE (Question 1.12 suite)
+\d+ joueurEquipes
+BEGIN;
+ALTER TABLE joueurEquipes DROP CONSTRAINT "joueurequipes_eid_fkey";
+ALTER TABLE joueurEquipes ADD CONSTRAINT joueurequipes_eid_fkey FOREIGN KEY (eid) REFERENCES equipes(eid) ON DELETE CASCADE;
+\d+ joueurEquipes
+ALTER TABLE joueurEquipes DROP CONSTRAINT "joueurequipes_eid_fkey";
+ALTER TABLE joueurEquipes ADD CONSTRAINT joueurequipes_eid_fkey FOREIGN KEY (eid) REFERENCES equipes(eid);
+\d+ joueurEquipes
+ROLLBACK;
+ALTER TABLE joueurEquipes DROP CONSTRAINT "joueurequipes_eid_fkey";
+ALTER TABLE joueurEquipes ADD CONSTRAINT joueurequipes_eid_fkey FOREIGN KEY (eid) REFERENCES equipes(eid) ON DELETE CASCADE;
+\d+ joueurEquipes
+
+
+\! echo Question 1.13
+BEGIN;
+SELECT * FROM equipes;
+DELETE FROM equipes WHERE nom='All Blacks';
+SELECT * FROM equipes;
+ROLLBACK;

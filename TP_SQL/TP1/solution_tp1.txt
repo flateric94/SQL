@@ -1,0 +1,73 @@
+\! echo --- Requete 1 ---
+\d 
+\d magasin
+
+\! echo --- Requete 2 ---
+SELECT * FROM Produit;
+
+\! echo --- Requete 3 ---
+SELECT DISTINCT ville FROM usine;
+
+\! echo --- Requete 4 ---
+SELECT nom_prod, couleur FROM produit;
+
+\! echo --- Requete 5 ---
+SELECT ref_prod, quantite FROM provenance WHERE ref_mag = 14;
+
+\! echo --- Requete 6 ---
+SELECT ref_usine, nom_usine, ville FROM usine WHERE ville = 'Marseille';
+
+\! echo --- Requete 7 ---
+SELECT ref_mag FROM provenance WHERE ref_usine = 109 AND ref_prod = 1;
+
+\! echo --- Requete 8 ---
+SELECT ref_prod, nom_prod FROM produit WHERE couleur = 'rouge';
+
+\! echo --- Requete 9 ---
+SELECT nom_mag FROM magasin WHERE ville LIKE 'L%';
+
+\! echo --- Requete 10 ---
+SELECT ref_prod, nom_prod FROM produit WHERE nom_prod LIKE 'casse%';
+
+\! echo --- Requete 11 ---
+SELECT ref_mag FROM provenance WHERE quantite != 0;
+SELECT DISTINCT ref_mag FROM provenance WHERE quantite != 0;
+
+\! echo --- Requete 12 ---
+SELECT nom_prod, couleur FROM produit WHERE poids >= 15 AND poids <= 45;
+
+\! echo --- Requete 13 ---
+SELECT nom_prod FROM produit WHERE (couleur = 'jaune' OR couleur = 'bleu') AND poids < 20;
+
+\! echo --- Requete 14 ---
+SELECT nom_prod FROM produit WHERE (couleur = 'jaune' AND poids < 20) OR (couleur = 'bleu' AND poids < 20);
+\! echo Aucune difference mais on peut ecrire les 2
+
+\! echo --- Requete 15 ---
+SELECT nom_prod FROM produit WHERE nom_prod LIKE 'lampe%' OR poids > 30;
+
+\! echo --- Requete 16 ---
+SELECT ref_mag FROM magasin WHERE nom_mag LIKE 'NULL';
+
+\! echo --- Requete 17 ---
+SELECT ref_mag FROM magasin WHERE nom_mag LIKE '' OR nom_mag IS NULL;
+\! echo La difference est que 32 est vide (y a rien) et 36 n'a pas de texte, mais il y a une case texte (mais vide)
+
+\! echo --- Requete 18 ---
+\! echo requetes monotables
+SELECT ref_prod FROM provenance WHERE ref_usine IN (SELECT ref_usine FROM usine WHERE nom_usine='martin');
+\! echo jointure
+SELECT provenance.ref_prod FROM usine, provenance WHERE usine.ref_usine = provenance.ref_usine AND nom_usine = 'martin';
+
+\! echo --- Requete 19 ---
+SELECT DISTINCT nom_usine FROM usine, magasin WHERE magasin.ville = usine.ville;
+
+\! echo --- Requete 20 ---
+SELECT ref_prod, quantite FROM provenance, magasin WHERE magasin.ref_mag = provenance.ref_mag AND nom_mag LIKE 'P%';
+
+\! echo --- Requete 21 ---
+SELECT nom_usine FROM produit, usine, provenance
+WHERE provenance.ref_prod = produit.ref_prod AND provenance.ref_usine = usine.ref_usine AND nom_prod = 'ordinateur';
+
+\! echo --- Requete 22 ---
+SELECT p1.nom_prod FROM produit as p1, produit as p2 WHERE p1.poids = p2.ref_prod;
